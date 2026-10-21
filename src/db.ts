@@ -24,7 +24,8 @@ export interface UrlRecord {
 
 const saveCodeStmt: Statement = database.prepare(`
     INSERT INTO urls (code, url)
-    values (?, ?)
+    values (?, ?) 
+    RETURNING *
 `);
 
 const getUrlStmt: Statement = database.prepare(`
@@ -39,9 +40,15 @@ export function getUrl (code: string): UrlRecord | undefined {
     return getUrlStmt.get(code) as UrlRecord | undefined;
 }
 
-export function saveCode(code: string, url: string ) {
-    saveCodeStmt.run(code, url);
-}
+export function saveCode(code: string, url: string ): boolean {
+    try {
+        saveCodeStmt.run(code, url);
+    } catch (err) {
+        console.log(err);
+        return false;
+    };
+    return true;   
+}   
 
 export default database;
 
