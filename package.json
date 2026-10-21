@@ -1,0 +1,26 @@
+{
+  "name": "shortener",
+  "version": "1.0.0",
+  "description": "Link shortener simple server with nosql as database",
+  "license": "ISC",
+  "author": "maksym kvetsko",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --minify",
+    "compile-nomin": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --packages=external",
+    "start": "node ./dist/index.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.5",
+    "better-sqlite3": "^13.0.3",
+    "esbuild": "^0.28.2",
+    "hono": "^4.13.13",
+    "typescript": "^7.0.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/sqlite3": "^3.1.11"
+  }
+}
