@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Title</title>
+</head>
+<body>
+    <form id="form">
+        <input type="url" name="url" id="url-input" placeholder="Enter an URL you want to make shorter" required>
+        <button type="submit">Shorten URL</button>
+    </form>
+    <script>
+        document.getElementById('form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const urlInput = document.getElementById('url-input');
+            const url = urlInput.value;
+
+            try {
+                const response = await fetch('/shorten', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                alert(`Shortened URL: ${data.shortenedUrl}`);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to shorten URL. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

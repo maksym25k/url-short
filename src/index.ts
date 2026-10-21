@@ -3,10 +3,11 @@ import { Hono } from 'hono'
 import { getUrl, saveCode } from './db.js'
 import { validUrl } from './helper.js'
 import { nanoid } from "nanoid"
+import fs from 'fs'
 
 const app = new Hono();
 
-app.get('/', (c) => c.text("Page"));
+app.get('/', (c) =>c.html(fs.readFileSync("./public/index.html", "utf-8")));
 
 app.get('/link', (c) => c.text(getUrl(c.req.query('id') ?? "")?.url ?? ""));
 
