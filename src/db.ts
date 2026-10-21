@@ -1,6 +1,6 @@
 import Database, { type Statement, type Database as DbType } from "better-sqlite3"
 
-const database: DbType = new Database("../db/storage.db");
+const database: DbType = new Database("./storage.db");
 
 database.exec(`
 CREATE TABLE IF NOT EXISTS urls (
@@ -10,9 +10,7 @@ CREATE TABLE IF NOT EXISTS urls (
     clicks INTEGER NOT NULL DEFAULT 0,
     last_click DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)
-    INSERT INTO urls (code, url) 
-    values("111", "https://calendar.google.com/calendar/u/0/r")
+);
 `)
 
 export interface UrlRecord {
