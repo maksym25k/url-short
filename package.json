@@ -8,9 +8,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --minify",
-    "compile-nomin": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --packages=external",
-    "start": "node ./dist/index.js"
+    "b": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --minify --packages=external",
+    "bn": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --packages=external",
+    "s": "node ./dist/index.js"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.5",

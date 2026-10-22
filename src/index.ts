@@ -1,36 +1,57 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
-import { getUrl, saveCode } from './db.js'
-import { validUrl } from './helper.js'
-import { nanoid } from "nanoid"
+import { validUrl } from './utils.js'
+import { saveUrlCustom, saveUrlRandom } from './logic.js'
+import { getUrl } from './db.js'
 import fs from 'fs'
 
 const app = new Hono();
 
-app.get('/', (c) =>c.html(fs.readFileSync("./public/index.html", "utf-8")));
+app.get('/', (c) => c.html(fs.readFileSync("./public/index.html", "utf-8")));
 
-app.get('/link', (c) => c.redirect(getUrl(c.req.query('id') ?? "")?.url ?? "", 302));
+app.get('/link', (c) => {
+    const url = getUrl(c.req.query('alias') ?? "")?.url;
+    if(!url) {
+        return c.json({ error: "There was no url found for this alias"}, 400);
+    } 
+    return c.redirect(url, 302);
+});
 
 app.get('/shortlink', (c) => {
-    const url = c.req.query("url") || "";
-    const customText = c.req.query("custom") || "";
-    if(!validUrl(url)) return c.json({ error: "Please insert valid url" }, 404);
-    if(customText.match(/[^a-zA-Z0-9_-]/)) return c.json({ error: "Custom text can only contain letters, numbers, underscores and dashes" }, 404);
-    let saved = false;
-    let id;
-    console.log(customText);
-    console.log(url);
-    do {
-        id = nanoid(customText == "" || customText.length <= 6? 8 : 6);
-        saved = saveCode(id, url, customText);
-    } while(!saved);
+    const url = c.req.query("url")?.replace(/\s/g, '') || "";
+    const customText = c.req.query("custom")?.replace(/\s/g, '') || "";
     
-    const newurl = "localhost:3000/link?id=" + customText + "_" + id;
+    if (!validUrl(url)) return c.json({ error: "Please insert valid url" }, 400);
+    if (customText.match(/[^a-zA-Z0-9_-]/)) 
+        return c.json({ error: "Custom text can only contain letters, numbers, underscores and dashes" }, 400);
     
+    let code = "";
+    if(customText !== "") {
+        try {
+            saveUrlCustom(url, customText);
+        } catch (err: any) {
+            if(err.message === "The custom alias is already taken"){
+                return c.json({ error: "The custom link alias is already taken" }, 400);
+            } else {
+                return c.json({ error: "Internal server error" }, 500);
+            }
+        }
+    } else {
+        try{
+            code = saveUrlRandom(url);
+        } catch (err: any) {
+            return c.json({ error: "Internal server error" }, 500);
+        }
+    }
+    
+    const newurl = "192.168.0.32:3000/link?alias=" + customText + code;
     return c.json({ shortUrl: newurl });
 });
 
 serve({
     fetch: app.fetch,
     port: 3000,
+    hostname: '0.0.0.0',
+}, (info) => {
+    console.log('Server started on http://' + info.address + ':' + info.port);
 });
