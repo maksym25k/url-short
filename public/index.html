@@ -8,6 +8,7 @@
 <body>
     <form id="form">
         <input type="url" name="url" id="url-input" placeholder="Enter an URL you want to make shorter" required>
+        <input type="text" name="custom" id="custom-input" placeholder="Enter a custom text (optional)">
         <button type="submit">Shorten URL</button>
     </form>
     <script>
@@ -15,14 +16,15 @@
             event.preventDefault();
             const urlInput = document.getElementById('url-input');
             const url = urlInput.value;
+            const customInput = document.getElementById('custom-input');
+            const customText = customInput.value;
 
             try {
-                const response = await fetch('/shorten', {
+                const response = await fetch(`/shortlink?url=${encodeURIComponent(url)}&custom=${encodeURIComponent(customText)}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ url })
+                    }
                 });
 
                 if (!response.ok) {
@@ -30,7 +32,7 @@
                 }
 
                 const data = await response.json();
-                alert(`Shortened URL: ${data.shortenedUrl}`);
+                alert(`Shortened URL: ${data.shortUrl}`);
             } catch (error) {
                 console.error('Error:', error);
                 alert('Failed to shorten URL. Please try again.');
