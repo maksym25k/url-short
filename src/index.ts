@@ -4,8 +4,12 @@ import { validUrl } from './utils.js'
 import { saveUrlCustom, saveUrlRandom } from './logic.js'
 import { getUrl } from './db.js'
 import fs from 'fs'
+import process, { env } from 'process'
 
 const app = new Hono();
+
+const baseUrl = env.BASE_URL || "http://localhost";
+const port = env.PORT || 3000;
 
 app.get('/', (c) => c.html(fs.readFileSync("./public/index.html", "utf-8")));
 
@@ -44,7 +48,7 @@ app.get('/shortlink', (c) => {
         }
     }
     
-    const newurl = "192.168.0.32:3000/link?alias=" + customText + code;
+    const newurl = baseUrl + ":" + port + "/link?alias=" + customText + code;
     return c.json({ shortUrl: newurl });
 });
 
