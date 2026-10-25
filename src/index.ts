@@ -1,20 +1,30 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { validUrl } from './utils.js'
-import { saveUrlCustom, saveUrlRandom } from './logic.js'
+import { saveUrlCustom, saveUrlRandom, getUsageData } from './logic.js'
 import { getUrl } from './db.js'
 import fs from 'fs'
 import process, { env } from 'process'
 
 const app = new Hono();
 
-const baseUrl = env.BASE_URL || "http://localhost";
-const baseIp = env.BASE_IP || "localhost";
+const baseDomain = env.BASE_URL || "localhost";
+const baseIp = env.BASE_IP || "127.0.0.1";
 const port = Number(env.PORT) || 3000;
 
 const indexHtml = fs.readFileSync("./public/index.html", "utf-8");
 
 app.get('/', (c) => c.html(indexHtml));
+
+app.get('usage-metrics', (c) => {
+    const ids = c.req.query("alias")?.replace(/\s/g, '') || "";
+    if(ids === "") {
+        return c.json({ error: "Please provide alias list" }, 400);
+    }
+    const usageData = getUsageData(ids.split(','));
+    console.log("Usage data: ", usageData);
+    return c.json({ message: "Usage metrics endpoint", usageData: usageData });
+});
 
 app.get('/link', (c) => {
     const url = getUrl(c.req.query('alias') ?? "")?.url;
@@ -51,7 +61,7 @@ app.get('/shortlink', (c) => {
         }
     }
     
-    const newurl = baseIp + ":" + port + "/link?alias=" + customText + code;
+    const newurl = baseDomain + ":" + port + "/link?alias=" + customText + code;
     return c.json({ shortUrl: newurl });
 });
 
@@ -60,5 +70,5 @@ serve({
     port: port,
     hostname: baseIp,
 }, (info) => {
-    console.log('Server started ' + baseUrl + ':' + port + ' at ' + new Date().toLocaleString());
+    console.log('Server started ' + baseDomain + ':' + port + ' at ' + new Date().toLocaleString());
 });

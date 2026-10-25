@@ -8,9 +8,7 @@ CREATE TABLE IF NOT EXISTS urls (
     code TEXT NOT NULL,
     url TEXT NOT NULL,
     custom_text TEXT,
-    combined_code TEXT GENERATED ALWAYS AS (custom_text || code) STORED UNIQUE,
-    clicks INTEGER NOT NULL DEFAULT 0,
-    last_click DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ident TEXT GENERATED ALWAYS AS (custom_text || code) STORED UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     status TEXT NOT NULL DEFAULT 'active' check(status IN ('active', 'inactive'))
 );
@@ -19,6 +17,7 @@ CREATE TABLE IF NOT EXISTS clicks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     url_id INTEGER NOT NULL,
     click_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    click_day DATE NOT NULL DEFAULT (date(click_time)),
     FOREIGN KEY (url_id) REFERENCES urls(id)
 );
 `)
@@ -27,7 +26,7 @@ export interface UrlRecord {
     id: number;
     code: string;
     url: string;
-    combined_code: string;
+    ident: string;
     clicks: number,
     last_click: string;
     created_at: string;
@@ -50,11 +49,8 @@ const saveCustomStmt: Statement = database.prepare(`
 `);
 
 const getUrlStmt: Statement = database.prepare(`
-    UPDATE urls
-    SET clicks = clicks + 1,
-        last_click = CURRENT_TIMESTAMP
-    WHERE combined_code = ?
-    RETURNING *    
+    SELECT * from urls
+    WHERE ident = ?
 `);
 
 const addClickStmt: Statement = database.prepare(`
@@ -68,8 +64,31 @@ const getUrlSilentStmt: Statement = database.prepare(`
     WHERE url = ? AND (custom_text = '' OR custom_text IS NULL)
 `);
 
+const getClicksStmt: Statement = database.prepare(`
+    SELECT *
+    FROM clicks
+    WHERE url_id IN (?)
+`);
+
+const getUrlsStmt: Statement = database.prepare(`
+    SELECT *
+    FROM urls
+    WHERE ident IN (?)
+`);
+
+export function getUrls(aliasList: string[]): UrlRecord[] {
+    return getUrlsStmt.all(aliasList.join(',')) as UrlRecord[];
+}
+
 export function saveRandom(code: string, url: string) {
     saveRandomStmt.run(code, url);
+}
+
+export function getClicks(aliasList: string[]): {clicks: ClickRecord[], urls: UrlRecord[]} {
+    const urls = getUrls(aliasList);
+    const ids = urls.map(url => url.id);
+    const clicks = getClicksStmt.all(ids.join(',')) as ClickRecord[];
+    return { clicks, urls: urls };
 }
 
 export function saveCustom(custom_text: string, url: string) {
