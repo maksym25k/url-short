@@ -9,9 +9,12 @@ import process, { env } from 'process'
 const app = new Hono();
 
 const baseUrl = env.BASE_URL || "http://localhost";
-const port = env.PORT || 3000;
+const baseIp = env.BASE_IP || "localhost";
+const port = Number(env.PORT) || 3000;
 
-app.get('/', (c) => c.html(fs.readFileSync("./public/index.html", "utf-8")));
+const indexHtml = fs.readFileSync("./public/index.html", "utf-8");
+
+app.get('/', (c) => c.html(indexHtml));
 
 app.get('/link', (c) => {
     const url = getUrl(c.req.query('alias') ?? "")?.url;
@@ -48,14 +51,14 @@ app.get('/shortlink', (c) => {
         }
     }
     
-    const newurl = baseUrl + ":" + port + "/link?alias=" + customText + code;
+    const newurl = baseIp + ":" + port + "/link?alias=" + customText + code;
     return c.json({ shortUrl: newurl });
 });
 
 serve({
     fetch: app.fetch,
-    port: 3000,
-    hostname: '0.0.0.0',
+    port: port,
+    hostname: baseIp,
 }, (info) => {
-    console.log('Server started on http://' + info.address + ':' + info.port);
+    console.log('Server started ' + baseUrl + ':' + port + ' at ' + new Date().toLocaleString());
 });
