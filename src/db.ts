@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS clicks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     url_id INTEGER NOT NULL,
     click_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    click_day DATE NOT NULL DEFAULT (date(click_time)),
+    click_date DATE NOT NULL DEFAULT CURRENT_DATE,
     FOREIGN KEY (url_id) REFERENCES urls(id)
 );
 `)
@@ -76,6 +76,17 @@ const getUrlsStmt: Statement = database.prepare(`
     WHERE ident IN (?)
 `);
 
+function generateGetClicksPerUserPerUrlStmt(aliasList: string[]): Statement {
+    const aliasString = aliasList.map(() => '?').join(",");
+    const string = `SELECT u.ident, c.click_date, COUNT(c.id) as click_count
+    FROM urls u
+    LEFT JOIN clicks c ON u.id = c.url_id
+    WHERE u.ident IN (${aliasString})
+    GROUP BY u.ident, c.click_date`;
+    console.log(string);
+    return database.prepare(string);
+}
+
 export function getUrls(aliasList: string[]): UrlRecord[] {
     return getUrlsStmt.all(aliasList.join(',')) as UrlRecord[];
 }
@@ -84,11 +95,17 @@ export function saveRandom(code: string, url: string) {
     saveRandomStmt.run(code, url);
 }
 
-export function getClicks(aliasList: string[]): {clicks: ClickRecord[], urls: UrlRecord[]} {
-    const urls = getUrls(aliasList);
-    const ids = urls.map(url => url.id);
-    const clicks = getClicksStmt.all(ids.join(',')) as ClickRecord[];
-    return { clicks, urls: urls };
+
+export function getClicksPerDatePerUrl(aliasList: string[]): Record<string, Record<string, number>> {
+    const stmt = generateGetClicksPerUserPerUrlStmt(aliasList);
+    const clickData = stmt.all(aliasList) as { ident: string, click_date: string, click_count: number }[];
+    console.log(clickData);
+    const groupedByUrl = Object.groupBy(clickData, (data) => data.ident);
+    let output: Record<string, Record<string, number>> = {};
+    for (const [ident, clicks] of Object.entries(groupedByUrl)) {
+        output[ident] = Object.fromEntries(clicks?.map(click => [click.click_date, click.click_count]) || []);
+    }
+    return output;
 }
 
 export function saveCustom(custom_text: string, url: string) {

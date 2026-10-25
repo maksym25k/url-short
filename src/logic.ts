@@ -1,4 +1,4 @@
-import { saveCustom, saveRandom, getUrlSilent, getClicks, ClickRecord } from './db.js'
+import { saveCustom, saveRandom, getUrlSilent, ClickRecord } from './db.js'
 import { SqliteError } from 'better-sqlite3';
 import { nanoid } from "nanoid"
 
@@ -44,12 +44,3 @@ export function saveUrlRandom(url: string): string {
 
 }
 
-export function getUsageData(aliasList: string[]): Record<string, ClickRecord[]> {
-    console.log("Getting usage data for alias list: ", aliasList);
-    const { clicks, urls } = getClicks(aliasList);
-    const groupedByUrlId =  Object.groupBy(clicks, (click) => click.url_id);
-    const usageData = urls.map(url => {
-        return [url.ident, groupedByUrlId[url.id] || []] as [string, ClickRecord[]];
-    });
-    return Object.fromEntries(usageData);
-}

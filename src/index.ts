@@ -1,8 +1,8 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { validUrl } from './utils.js'
-import { saveUrlCustom, saveUrlRandom, getUsageData } from './logic.js'
-import { getUrl } from './db.js'
+import { saveUrlCustom, saveUrlRandom } from './logic.js'
+import { getUrl, getClicksPerDatePerUrl } from './db.js'
 import fs from 'fs'
 import process, { env } from 'process'
 
@@ -17,13 +17,13 @@ const indexHtml = fs.readFileSync("./public/index.html", "utf-8");
 app.get('/', (c) => c.html(indexHtml));
 
 app.get('usage-metrics', (c) => {
-    const ids = c.req.query("alias")?.replace(/\s/g, '') || "";
-    if(ids === "") {
+    const ids = c.req.queries("alias") || []; 
+    if(ids?.length === 0) {
         return c.json({ error: "Please provide alias list" }, 400);
     }
-    const usageData = getUsageData(ids.split(','));
-    console.log("Usage data: ", usageData);
-    return c.json({ message: "Usage metrics endpoint", usageData: usageData });
+    console.log(ids);
+    const usageData = getClicksPerDatePerUrl(ids);
+    return c.json({ message: "Usage metrics endpoint", usageData });
 });
 
 app.get('/link', (c) => {
