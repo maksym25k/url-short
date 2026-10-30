@@ -1,5 +1,6 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
+import { serveStatic } from '@hono/node-server/serve-static'
 import { validUrl } from './utils.js'
 import { saveUrlCustom, saveUrlRandom } from './logic.js'
 import { getUrl, getClicksPerDatePerUrl } from './db.js'
@@ -14,7 +15,7 @@ const port = Number(env.PORT) || 3000;
 
 const indexHtml = fs.readFileSync("./public/index.html", "utf-8");
 
-app.get('/', (c) => c.html(indexHtml));
+app.use('/*', serveStatic({ root: './public' }));
 
 app.get('usage-metrics', (c) => {
     const ids = c.req.queries("alias") || []; 

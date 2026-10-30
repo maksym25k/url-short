@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>URL Shortener</title>
+
+<head>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        #form {
+            background: #ffffff;
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        #form input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            border: 2px solid #e1e4e8;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            background-color: #fafbfc;
+        }
+
+        #form input:focus {
+            border-color: #3182ce;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+        }
+
+        #form input::placeholder {
+            color: #a0aec0;
+        }
+
+        #form button {
+            background-color: #3182ce;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.85rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        #form button:hover {
+            background-color: #2b6cb0;
+        }
+
+        #form button:active {
+            transform: scale(0.98);
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Title</title>
+</head>
+
+<body>
+    <form id="form">
+        <h3>URL Shortener</h3>
+        <input type="url" name="url" id="url-input" placeholder="Enter an URL to check its stats" required>
+        <a target="_blank" id="result"></a>
+        <button type="submit">Shorten URL</button>
+    </form>
+    <script>
+        document.getElementById('form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const urlInput = document.getElementById('url-input');
+            const url = urlInput.value;
+            const customInput = document.getElementById('custom-input');
+            const customText = customInput.value;
+
+            try {
+                const response = await fetch(`/shortlink?url=${encodeURIComponent(url)}&custom=${encodeURIComponent(customText)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const json = await response.json();
+                console.log(json);
+                if (!response.ok) {
+                    alert(json.error || 'Failed to shorten URL. Please try again.');
+                    return;
+                }
+
+                const resultElement = document.getElementById('result');
+                resultElement.textContent = `${json.shortUrl}`;
+                resultElement.href = "http://" + json.shortUrl;
+                form.reset();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to shorten URL. Please try again.');
+            }
+        });
+    </script>
+</body>
+
+</html>

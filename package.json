@@ -9,7 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "b": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --minify --packages=external",
-    "bn": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --packages=external",
+    "bn": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --packages=external --watch",
     "s": "node ./dist/index.js"
   },
   "dependencies": {
@@ -18,6 +18,8 @@
     "esbuild": "^0.28.2",
     "hono": "^4.13.13",
     "nanoid": "^6.0.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "typescript": "^7.0.2"
   },
   "devDependencies": {
