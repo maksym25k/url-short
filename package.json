@@ -8,8 +8,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+<<<<<<< HEAD
     "b": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --minify --packages=external",
     "bn": "esbuild ./src/index.ts --bundle --outdir=./dist --platform=node --format=esm --packages=external --watch",
+=======
+    "b": "esbuild ./src/index.ts --bundle --outdir=./dist/be --platform=node --format=esm --minify --packages=external",
+    "bn": "esbuild ./src/index.ts --bundle --outdir=./dist/be --platform=node --format=esm --packages=external",
+>>>>>>> 02304c3c15c046cd99324425c3a57ef8ad7bc61c
     "s": "node ./dist/index.js"
   },
   "dependencies": {
@@ -19,11 +24,15 @@
     "hono": "^4.13.13",
     "nanoid": "^6.0.2",
     "react": "^19.3.1",
+<<<<<<< HEAD
     "react-dom": "^19.3.1",
+=======
+>>>>>>> 02304c3c15c046cd99324425c3a57ef8ad7bc61c
     "typescript": "^7.0.2"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",
+    "@types/react": "^19.3.0",
     "@types/sqlite3": "^3.1.11"
   }
 }
